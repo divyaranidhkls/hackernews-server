@@ -3,6 +3,10 @@ import {
   SignUpWithUsernameAndPasswordError,
   type SignUpWithUsernameAndPasswordResult,
 } from "./authentication-types.js";
+import {
+  type LogInWithUsernameAndPasswordResult,
+  LogInWtihUsernameAndPasswordError,
+} from "./authentication-types.js";
 import jwt from "jsonwebtoken";
 import { prismaClient } from "../../extra/prisma.js";
 import { jwtSecretKey } from "../../environment.js";
@@ -76,5 +80,40 @@ export const signUpWithUsernameAndPassword = async (parameters: {
     return result;
   } catch (e) {
     throw SignUpWithUsernameAndPasswordError.UNKNOWN;
+  }
+};
+
+export const logInWithUsernameAndPassword = async (parameters: {
+  username: string;
+  password: string;
+}): Promise<LogInWithUsernameAndPasswordResult> => {
+  try {
+    const passwordHash = createHash("sha256")
+      .update(parameters.password)
+      .digest("hex");
+
+    const user = await prismaClient.user.findUnique({
+      where: {
+        username: parameters.username,
+        password: passwordHash,
+      },
+    });
+
+    if (!user) {
+      throw LogInWtihUsernameAndPasswordError.INCORRECT_USERNAME_OR_PASSWORD;
+    }
+
+    const token = createJWToken({
+      id: user.id,
+      username: user.username,
+    });
+
+    return {
+      token,
+      user,
+    };
+  } catch (e) {
+    console.log("Error", e);
+    throw LogInWtihUsernameAndPasswordError.UNKNOWN;
   }
 };
