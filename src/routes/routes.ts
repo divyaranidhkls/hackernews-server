@@ -5,4 +5,3 @@ import { usersRoutes } from "./user-routes.js";
 export const allRoutes = new Hono();
 allRoutes.route("/log-in", authenticationRoutes);
 allRoutes.route("/users", usersRoutes);
-

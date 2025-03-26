@@ -43,7 +43,7 @@ usersRoutes.get("/me", tokenMiddleware, async (context) => {
 
 usersRoutes.get("/getAllUsers", tokenMiddleware, async (context) => {
   try {
-    const users = await getAllUsers(context);
+    const users = await getAllUsers();
     return context.json(users, 200);
   } catch (e) {
     return context.json({ message: e }, 404);

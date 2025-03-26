@@ -1,4 +1,5 @@
-import { getmeError, type getmeResult } from "./users-types.js";
+import { getmeError, GetUserError, type getmeResult } from "./users-types.js";
+import { type userResult } from "./users-types.js";
 import { prismaClient } from "../../extra/prisma.js";
 
 export const getMe = async (parameters: {
@@ -18,10 +19,10 @@ export const getMe = async (parameters: {
     user,
   };
 };
-export const getAllUsers = async (parameters: {}): Promise<{ user: { id: string; name: string | null; username: string; email: string; password: string; createdAt: Date; updatedAt: Date; }[] }>=>{
+export const getAllUsers = async (): Promise<userResult> => {
   const users = await prismaClient.user.findMany();
   if (!users) {
-    throw getmeError.BAD_REQUEST;
+    throw GetUserError.BAD_REQUEST;
   }
   return {
     user: users,
