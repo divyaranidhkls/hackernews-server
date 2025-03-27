@@ -23,6 +23,8 @@ export const LikePosts = async (parameters: {
   if (!postExists) {
     throw LikeErrors.NOT_FOUND;
   }
+
+
   const LikeExists = await prismaClient.like.findFirst({
     where: {
       userId,
