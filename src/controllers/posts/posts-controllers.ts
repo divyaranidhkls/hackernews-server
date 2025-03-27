@@ -2,6 +2,7 @@ import { prismaClient } from "../../extra/prisma.js";
 import {
   type createInputPost,
   type createPostResult,
+  type getPostsByme,
   type getPostsCrono,
   getPostsError,
 } from "./posts-types.js";
@@ -36,13 +37,40 @@ export const getPostsCronologicalOrder = async (
 ): Promise<getPostsCrono> => {
   const Results = await prismaClient.post.findMany({
     orderBy: {
-      createdAt: "asc",
+      createdAt: "desc",
     },
     include: {
       posts: true,
     },
     skip: (page - 1) * limit,
     take: limit,
+  });
+  const total = await prismaClient.post.count();
+
+  if (!Results) {
+    throw getPostsError.BAD_REQUEST;
+  }
+
+  return { post: Results, total: total };
+};
+
+export const getPostsBymeInOrder = async (parameters: {
+  userId: string;
+  page: number;
+  limit: number;
+}): Promise<getPostsByme> => {
+  const Results = await prismaClient.post.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      userId: parameters.userId,
+    },
+    include: {
+      posts: true,
+    },
+    skip: (parameters.page - 1) * parameters.limit,
+    take: parameters.limit,
   });
   const total = await prismaClient.post.count();
 

@@ -15,3 +15,8 @@ export type getPostsCrono = {
   post: Array<Post>;
   total: number;
 };
+
+export type getPostsByme = {
+  post: Array<Post>;
+  total: number;
+};
