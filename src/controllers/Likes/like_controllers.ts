@@ -1,7 +1,7 @@
 import { type LikePost, LikeErrors } from "./likes-types.js";
 import { prismaClient } from "../../extra/prisma.js";
 import { type getAllLikes } from "./likes-types.js";
-
+import { DeleteLikeErrors } from "../Likes/likes-types.js";
 export const LikePosts = async (parameters: {
   userId: string;
   postId: string;
@@ -63,4 +63,46 @@ export const getLikes = async (parameters: {
   }
 
   return { Like: Results, total: total };
+};
+
+export const deleteLikeById = async (Parameters: {
+  userId: string;
+  postId: string;
+}) => {
+  const { userId, postId } = Parameters;
+
+  const user = await prismaClient.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw DeleteLikeErrors.NOT_FOUND;
+  } else {
+    const posts = await prismaClient.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (posts) {
+      const LikeExists = await prismaClient.like.findFirst({
+        where: {
+          userId,
+          postId,
+        },
+      });
+      if (LikeExists) {
+        await prismaClient.like.delete({
+          where: {
+            id: LikeExists.id,
+          },
+        });
+        return "Like Deleted SucceFully";
+      }
+    }
+
+    throw DeleteLikeErrors.NOT_FOUND;
+  }
 };

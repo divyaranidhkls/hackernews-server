@@ -25,7 +25,7 @@ export const getAllUsers = async (
 ): Promise<userResult> => {
   const users = await prismaClient.user.findMany({
     orderBy: {
-      username : "asc",
+      username: "asc",
     },
     skip: (page - 1) * limit,
     take: limit,

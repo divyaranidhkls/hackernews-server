@@ -4,6 +4,8 @@ import { prismaClient } from "../extra/prisma.js";
 import { tokenMiddleware } from "../routes/middlewares/token-middlewares.js";
 import { LikePosts } from "../controllers/Likes/like_controllers.js";
 import { getLikes } from "../controllers/Likes/like_controllers.js";
+import { deleteLikeById } from "../controllers/Likes/like_controllers.js";
+import { DeleteLikeErrors } from "../controllers/Likes/likes-types.js";
 export const LikeRoutes = new Hono();
 LikeRoutes.post("/LikePosts/:postId", tokenMiddleware, async (c) => {
   const userId = await c.get("userId");
@@ -46,4 +48,24 @@ LikeRoutes.get("/getAllLikes/:postId", tokenMiddleware, async (context) => {
   } catch (e) {
     return context.json({ message: e }, 404);
   }
+});
+
+LikeRoutes.delete("/DeleteLikes/:postId", tokenMiddleware, async (context) => {
+  const userId = context.get("userId");
+  const postId = await context.req.param("postId");
+
+  try {
+    const deleteLikes = await deleteLikeById({ userId, postId });
+    if (deleteLikes) {
+      return context.json("Like deleted Successfully");
+    }
+  } catch (e) {
+    if (e === DeleteLikeErrors.NOT_FOUND) {
+      return context.json("Like Not Found");
+    }
+    if (e === DeleteLikeErrors.UNAUTHORIZED) {
+      return context.json("User is Not Authorized");
+    }
+  }
+  return context.json("Internal ServerError");
 });
