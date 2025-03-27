@@ -1,5 +1,6 @@
 import { type LikePost, LikeErrors } from "./likes-types.js";
 import { prismaClient } from "../../extra/prisma.js";
+import { type getAllLikes } from "./likes-types.js";
 
 export const LikePosts = async (parameters: {
   userId: string;
@@ -40,4 +41,26 @@ export const LikePosts = async (parameters: {
   });
 
   return { Likes: Result };
+};
+
+export const getLikes = async (parameters: {
+  page: number;
+  limit: number;
+  postId: String;
+}): Promise<getAllLikes> => {
+  const { page, limit } = parameters;
+  const Results = await prismaClient.like.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  const total = await prismaClient.like.count();
+
+  if (!Results) {
+    throw LikeErrors.UNAUTHORIZED;
+  }
+
+  return { Like: Results, total: total };
 };

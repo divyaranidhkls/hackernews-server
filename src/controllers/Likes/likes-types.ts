@@ -8,3 +8,9 @@ export enum LikeErrors {
   UNAUTHORIZED,
   ALREADY_LIKED,
 }
+
+export type getAllLikes =
+{
+    Like : Array<Like>,
+    total : number 
+}
