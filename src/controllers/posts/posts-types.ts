@@ -11,3 +11,7 @@ export enum getPostsError {
   BAD_REQUEST,
   UNAUTHORIZED,
 }
+export type getPostsCrono = {
+  post: Array<Post>;
+  total: number;
+};
