@@ -1,12 +1,14 @@
 import { getPostsError } from "../controllers/posts/posts-types.js";
 import {
   createPosts,
+  deletePostsById,
   getPostsCronologicalOrder,
 } from "../controllers/posts/posts-controllers.js";
 import { prismaClient } from "../extra/prisma.js";
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middlewares.js";
 import { getPostsBymeInOrder } from "../controllers/posts/posts-controllers.js";
+import { getDeletepostsError } from "../controllers/posts/posts-types.js";
 
 export const postRoutes = new Hono();
 
@@ -76,4 +78,24 @@ postRoutes.get("/getPostsBymeInOrder", tokenMiddleware, async (context) => {
     },
     500
   );
+});
+
+postRoutes.delete("/DeletePosts/:postId", tokenMiddleware, async (context) => {
+  const userId = await context.get("userId");
+  const postId = await context.req.param("postId");
+
+  try {
+    const deletePosts = await deletePostsById({ userId, postId });
+    if (deletePosts) {
+      return context.json("Posts deleted Successfully");
+    }
+  } catch (e) {
+    if (e === getDeletepostsError.UNAUTHORIZED) {
+      return context.json("Post Already Deleted");
+    }
+    if (e === getDeletepostsError.NOT_FOUND) {
+      return context.json("User Not Fond");
+    }
+  }
+  return context.json("Cant Delete");
 });

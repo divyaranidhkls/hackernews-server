@@ -20,3 +20,8 @@ export type getPostsByme = {
   post: Array<Post>;
   total: number;
 };
+
+export enum getDeletepostsError {
+  NOT_FOUND,
+  UNAUTHORIZED,
+}

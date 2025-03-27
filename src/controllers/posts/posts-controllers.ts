@@ -2,6 +2,7 @@ import { prismaClient } from "../../extra/prisma.js";
 import {
   type createInputPost,
   type createPostResult,
+  getDeletepostsError,
   type getPostsByme,
   type getPostsCrono,
   getPostsError,
@@ -79,4 +80,37 @@ export const getPostsBymeInOrder = async (parameters: {
   }
 
   return { post: Results, total: total };
+};
+
+export const deletePostsById = async (Parameters: {
+  userId: string;
+  postId: string;
+}) => {
+  const { userId, postId } = Parameters;
+
+  const user = await prismaClient.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw getDeletepostsError.NOT_FOUND;
+  } else {
+    const posts = await prismaClient.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (posts) {
+      await prismaClient.post.delete({
+        where: {
+          id: postId,
+        },
+      });
+      return "Posts Deleted";
+    }
+    throw getDeletepostsError.UNAUTHORIZED;
+  }
 };
