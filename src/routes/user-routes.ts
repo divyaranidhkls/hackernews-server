@@ -49,3 +49,25 @@ usersRoutes.get("/getAllUsers", tokenMiddleware, async (context) => {
     return context.json({ message: e }, 404);
   }
 });
+usersRoutes.get("/getAllusers", tokenMiddleware, async (context) => {
+  const page = Number(context.req.query("page") || 1);
+  const limit = Number(context.req.query("limit") || 10);
+  try {
+    const result = await getAllUsers(page, limit);
+
+    return context.json(
+      {
+        data: result.user,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+        },
+      },
+      200
+    );
+  } catch (e) {
+    return context.json({ message: e }, 404);
+  }
+});

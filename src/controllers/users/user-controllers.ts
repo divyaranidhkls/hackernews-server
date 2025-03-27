@@ -19,12 +19,23 @@ export const getMe = async (parameters: {
     user,
   };
 };
-export const getAllUsers = async (): Promise<userResult> => {
-  const users = await prismaClient.user.findMany();
+export const getAllUsers = async (
+  page: number = 1,
+  limit: number = 10
+): Promise<userResult> => {
+  const users = await prismaClient.user.findMany({
+    orderBy: {
+      username : "asc",
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  const totalusers = Number(prismaClient.user.count());
   if (!users) {
     throw GetUserError.BAD_REQUEST;
   }
   return {
     user: users,
+    total: totalusers,
   };
 };
