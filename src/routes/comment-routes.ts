@@ -4,6 +4,7 @@ import {
   CommentPosts,
   deteleComments,
   getComments,
+  UpdateComments,
 } from "../controllers/authentication/Comments/comments-controllers.js";
 import { getcommentError } from "../controllers/authentication/Comments/comments-types.js";
 import { get } from "http";
@@ -63,6 +64,31 @@ CommentRoutes.delete(
 
     try {
       const response = await deteleComments({ userId, commentsId });
+      if (response) {
+        return c.json(response);
+      }
+    } catch (e) {
+      if (e === getcommentError.UNAUTHORIZED) {
+        return c.json("Unauthorized Access");
+      }
+      if (e === getcommentError.NOT_FOUND) {
+        return c.json("User or Comments Not Found");
+      }
+    }
+    return c.json("Internal Server Error");
+  }
+);
+
+CommentRoutes.patch(
+  "/updateComments/:commentsId",
+  tokenMiddleware,
+  async (c) => {
+    const userId = await c.get("userId");
+    const commentsId = await c.req.param("commentsId");
+    const { content } = await c.req.json();
+
+    try {
+      const response = await UpdateComments({ userId, commentsId, content });
       if (response) {
         return c.json(response);
       }
