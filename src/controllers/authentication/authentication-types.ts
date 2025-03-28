@@ -11,12 +11,11 @@ export enum SignUpWithUsernameAndPasswordError {
 }
 
 export type LogInWithUsernameAndPasswordResult = {
-    token: string;
-    user: User;
-  };
-  
-  export enum LogInWtihUsernameAndPasswordError {
-    INCORRECT_USERNAME_OR_PASSWORD = "INCORRECT_USERNAME_OR_PASSWORD",
-    UNKNOWN = "UNKNOWN",
-  }
-  
+  token: string;
+  user: User;
+};
+
+export enum LogInWtihUsernameAndPasswordError {
+  INCORRECT_USERNAME_OR_PASSWORD = "INCORRECT_USERNAME_OR_PASSWORD",
+  UNKNOWN = "UNKNOWN",
+}

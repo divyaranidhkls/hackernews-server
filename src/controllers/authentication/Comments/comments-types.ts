@@ -9,3 +9,9 @@ export enum getcommentError {
   UNAUTHORIZED,
   NOT_FOUND,
 }
+
+
+export type getCommentByOrder ={
+  comments : Array<Comment>;
+  total : number;
+}

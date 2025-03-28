@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middlewares.js";
-import { CommentPosts } from "../controllers/authentication/Comments/comments-controllers.js";
+import {
+  CommentPosts,
+  getComments,
+} from "../controllers/authentication/Comments/comments-controllers.js";
 import { getcommentError } from "../controllers/authentication/Comments/comments-types.js";
 export const CommentRoutes = new Hono();
 CommentRoutes.post("/CommentPosts/:postId", tokenMiddleware, async (c) => {
@@ -20,3 +23,31 @@ CommentRoutes.post("/CommentPosts/:postId", tokenMiddleware, async (c) => {
     return c.json(" ");
   }
 });
+
+CommentRoutes.get(
+  "/getAllComments/:postId",
+  tokenMiddleware,
+  async (context) => {
+    const page = Number(context.req.query("page") || 1);
+    const limit = Number(context.req.query("limit") || 10);
+    const postId = await context.req.param("postId");
+    try {
+      const result = await getComments({ page, limit, postId });
+
+      return context.json(
+        {
+          data: result.comments,
+          pagination: {
+            page,
+            limit,
+            total: result.total,
+            totalPages: Math.ceil(result.total / limit),
+          },
+        },
+        200
+      );
+    } catch (e) {
+      return context.json({ message: e }, 404);
+    }
+  }
+);

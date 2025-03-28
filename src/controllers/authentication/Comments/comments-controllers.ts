@@ -2,6 +2,7 @@ import { prismaClient } from "../../../extra/prisma.js";
 import {
   type getcommentResult,
   getcommentError,
+  type getCommentByOrder,
 } from "../Comments/comments-types.js";
 export const CommentPosts = async (parameters: {
   userId: string;
@@ -35,4 +36,26 @@ export const CommentPosts = async (parameters: {
   });
 
   return { comment: Result };
+};
+
+export const getComments = async (parameters: {
+  page: number;
+  limit: number;
+  postId: String;
+}): Promise<getCommentByOrder> => {
+  const { page, limit } = parameters;
+  const Results = await prismaClient.comment.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  const total = await prismaClient.comment.count();
+
+  if (!Results) {
+    throw getcommentError.UNAUTHORIZED;
+  }
+
+  return { comments: Results, total: total };
 };
