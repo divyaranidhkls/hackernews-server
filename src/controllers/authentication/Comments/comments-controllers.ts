@@ -59,3 +59,34 @@ export const getComments = async (parameters: {
 
   return { comments: Results, total: total };
 };
+
+export const deteleComments = async (parameters: {
+  userId: string;
+  commentsId: string;
+}) => {
+  const { userId, commentsId } = parameters;
+  const users = await prismaClient.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!users) {
+    throw getcommentError.UNAUTHORIZED;
+  }
+  const comments = await prismaClient.comment.findUnique({
+    where: {
+      id: commentsId,
+    },
+  });
+  if (!comments) {
+    throw getcommentError.NOT_FOUND;
+  }
+
+  await prismaClient.comment.delete({
+    where: {
+      id: commentsId,
+    },
+  });
+
+  return "Comments Deleted Successfully";
+};
