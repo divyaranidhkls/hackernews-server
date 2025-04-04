@@ -126,3 +126,4 @@ jobs:
             --registry-server "${{ env.ACR_REGISTRY }}" \
             --registry-username "${{ env.ACR_USERNAME }}" \
             --registry-password "${{ env.ACR_PASSWORD }}"
+            --env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} NODE_ENV=production
