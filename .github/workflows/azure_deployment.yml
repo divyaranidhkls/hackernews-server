@@ -13,6 +13,7 @@ env:
   ACR_REGISTRY: hackernews1si22ad401.azurecr.io # This has to be unique (at least the `erbium` bit)
   ACR_REPOSITORY_NAME: hackernews
   CONTAINER_APP_NAME: hackernews
+  TARGET_PORT: 3000
 
 jobs:
   build-and-deploy:
@@ -148,3 +149,5 @@ jobs:
             --registry-server "${{ env.ACR_REGISTRY }}" \
             --registry-username "${{ env.ACR_USERNAME }}" \
             --registry-password "${{ env.ACR_PASSWORD }}"
+
+
