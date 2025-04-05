@@ -1,14 +1,9 @@
-import { serve } from '@hono/node-server'
-//import "dotenv/config";
-import { allRoutes } from "./routes/routes";
+import { serve } from '@hono/node-server';
+import { allRoutes } from './routes/routes';
 
-
-allRoutes.get("/info", (context) => {
-  return context.json({
-    message: "Hello World",
-  });
-});
-
-serve(allRoutes, (info) => {
-  console.log(`Server is running @ http://localhost:${info.port}`);
+serve({
+  fetch: allRoutes.fetch,
+  port: parseInt(process.env.PORT || '3000', 10),
+}, (info) => {
+  console.log(`🚀 Server is running at http://localhost:${info.port}`);
 });
