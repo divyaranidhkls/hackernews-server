@@ -1,24 +1,27 @@
-import { prismaClient } from "../../../extra/prisma.js";
-import { getcommentError, } from "../Comments/comments-types.js";
-export const CommentPosts = async (parameters) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UpdateComments = exports.deteleComments = exports.getComments = exports.CommentPosts = void 0;
+const prisma_js_1 = require("../../../extra/prisma.js");
+const comments_types_js_1 = require("../Comments/comments-types.js");
+const CommentPosts = async (parameters) => {
     const { userId, postId, content } = parameters;
-    const userExists = await prismaClient.user.findUnique({
+    const userExists = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!userExists) {
-        throw getcommentError.NOT_FOUND;
+        throw comments_types_js_1.getcommentError.NOT_FOUND;
     }
-    const postExists = await prismaClient.post.findUnique({
+    const postExists = await prisma_js_1.prismaClient.post.findUnique({
         where: {
             id: postId,
         },
     });
     if (!postExists) {
-        throw getcommentError.NOT_FOUND;
+        throw comments_types_js_1.getcommentError.NOT_FOUND;
     }
-    const Result = await prismaClient.comment.create({
+    const Result = await prisma_js_1.prismaClient.comment.create({
         data: {
             userId: userId,
             postId: postId,
@@ -27,65 +30,68 @@ export const CommentPosts = async (parameters) => {
     });
     return { comment: Result };
 };
-export const getComments = async (parameters) => {
+exports.CommentPosts = CommentPosts;
+const getComments = async (parameters) => {
     const { page, limit } = parameters;
-    const Results = await prismaClient.comment.findMany({
+    const Results = await prisma_js_1.prismaClient.comment.findMany({
         orderBy: {
             createdAt: "desc",
         },
         skip: (page - 1) * limit,
         take: limit,
     });
-    const total = await prismaClient.comment.count();
+    const total = await prisma_js_1.prismaClient.comment.count();
     if (!Results) {
-        throw getcommentError.UNAUTHORIZED;
+        throw comments_types_js_1.getcommentError.UNAUTHORIZED;
     }
     return { comments: Results, total: total };
 };
-export const deteleComments = async (parameters) => {
+exports.getComments = getComments;
+const deteleComments = async (parameters) => {
     const { userId, commentsId } = parameters;
-    const users = await prismaClient.user.findUnique({
+    const users = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!users) {
-        throw getcommentError.UNAUTHORIZED;
+        throw comments_types_js_1.getcommentError.UNAUTHORIZED;
     }
-    const comments = await prismaClient.comment.findUnique({
+    const comments = await prisma_js_1.prismaClient.comment.findUnique({
         where: {
             id: commentsId,
         },
     });
     if (!comments) {
-        throw getcommentError.NOT_FOUND;
+        throw comments_types_js_1.getcommentError.NOT_FOUND;
     }
-    await prismaClient.comment.delete({
+    await prisma_js_1.prismaClient.comment.delete({
         where: {
             id: commentsId,
         },
     });
     return "Comments Deleted Successfully";
 };
-export const UpdateComments = async (parameters) => {
+exports.deteleComments = deteleComments;
+const UpdateComments = async (parameters) => {
     const { userId, commentsId, content } = parameters;
-    const users = await prismaClient.user.findUnique({
+    const users = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!users) {
-        throw getcommentError.UNAUTHORIZED;
+        throw comments_types_js_1.getcommentError.UNAUTHORIZED;
     }
-    const comments = await prismaClient.comment.findUnique({
+    const comments = await prisma_js_1.prismaClient.comment.findUnique({
         where: {
             id: commentsId,
         },
     });
     if (!comments) {
-        throw getcommentError.NOT_FOUND;
+        throw comments_types_js_1.getcommentError.NOT_FOUND;
     }
-    const newComment = await prismaClient.comment.update({
+    const newComment = await prisma_js_1.prismaClient.comment.update({
         where: {
             id: commentsId,
         },
@@ -95,3 +101,4 @@ export const UpdateComments = async (parameters) => {
     });
     return { newComment };
 };
+exports.UpdateComments = UpdateComments;

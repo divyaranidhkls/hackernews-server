@@ -1,34 +1,37 @@
-import { LikeErrors } from "./likes-types.js";
-import { prismaClient } from "../../extra/prisma.js";
-import { DeleteLikeErrors } from "../Likes/likes-types.js";
-export const LikePosts = async (parameters) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteLikeById = exports.getLikes = exports.LikePosts = void 0;
+const likes_types_js_1 = require("./likes-types.js");
+const prisma_js_1 = require("../../extra/prisma.js");
+const likes_types_js_2 = require("../Likes/likes-types.js");
+const LikePosts = async (parameters) => {
     const { userId, postId } = parameters;
-    const userExists = await prismaClient.user.findUnique({
+    const userExists = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!userExists) {
-        throw LikeErrors.NOT_FOUND;
+        throw likes_types_js_1.LikeErrors.NOT_FOUND;
     }
-    const postExists = await prismaClient.post.findUnique({
+    const postExists = await prisma_js_1.prismaClient.post.findUnique({
         where: {
             id: postId,
         },
     });
     if (!postExists) {
-        throw LikeErrors.NOT_FOUND;
+        throw likes_types_js_1.LikeErrors.NOT_FOUND;
     }
-    const LikeExists = await prismaClient.like.findFirst({
+    const LikeExists = await prisma_js_1.prismaClient.like.findFirst({
         where: {
             userId,
             postId,
         },
     });
     if (LikeExists) {
-        throw LikeErrors.ALREADY_LIKED;
+        throw likes_types_js_1.LikeErrors.ALREADY_LIKED;
     }
-    const Result = await prismaClient.like.create({
+    const Result = await prisma_js_1.prismaClient.like.create({
         data: {
             userId,
             postId,
@@ -36,46 +39,48 @@ export const LikePosts = async (parameters) => {
     });
     return { Likes: Result };
 };
-export const getLikes = async (parameters) => {
+exports.LikePosts = LikePosts;
+const getLikes = async (parameters) => {
     const { page, limit } = parameters;
-    const Results = await prismaClient.like.findMany({
+    const Results = await prisma_js_1.prismaClient.like.findMany({
         orderBy: {
             createdAt: "desc",
         },
         skip: (page - 1) * limit,
         take: limit,
     });
-    const total = await prismaClient.like.count();
+    const total = await prisma_js_1.prismaClient.like.count();
     if (!Results) {
-        throw LikeErrors.UNAUTHORIZED;
+        throw likes_types_js_1.LikeErrors.UNAUTHORIZED;
     }
     return { Like: Results, total: total };
 };
-export const deleteLikeById = async (Parameters) => {
+exports.getLikes = getLikes;
+const deleteLikeById = async (Parameters) => {
     const { userId, postId } = Parameters;
-    const user = await prismaClient.user.findUnique({
+    const user = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!user) {
-        throw DeleteLikeErrors.NOT_FOUND;
+        throw likes_types_js_2.DeleteLikeErrors.NOT_FOUND;
     }
     else {
-        const posts = await prismaClient.post.findUnique({
+        const posts = await prisma_js_1.prismaClient.post.findUnique({
             where: {
                 id: postId,
             },
         });
         if (posts) {
-            const LikeExists = await prismaClient.like.findFirst({
+            const LikeExists = await prisma_js_1.prismaClient.like.findFirst({
                 where: {
                     userId,
                     postId,
                 },
             });
             if (LikeExists) {
-                await prismaClient.like.delete({
+                await prisma_js_1.prismaClient.like.delete({
                     where: {
                         id: LikeExists.id,
                     },
@@ -83,6 +88,7 @@ export const deleteLikeById = async (Parameters) => {
                 return "Like Deleted SucceFully";
             }
         }
-        throw DeleteLikeErrors.NOT_FOUND;
+        throw likes_types_js_2.DeleteLikeErrors.NOT_FOUND;
     }
 };
+exports.deleteLikeById = deleteLikeById;

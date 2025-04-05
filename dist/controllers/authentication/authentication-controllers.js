@@ -1,9 +1,15 @@
-import { createHash } from "crypto";
-import { SignUpWithUsernameAndPasswordError, } from "./authentication-types.js";
-import { LogInWtihUsernameAndPasswordError, } from "./authentication-types.js";
-import jwt from "jsonwebtoken";
-import { prismaClient } from "../../extra/prisma.js";
-import { jwtSecretKey } from "../../environment.js";
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.logInWithUsernameAndPassword = exports.signUpWithUsernameAndPassword = exports.checIfUserExistsAlready = void 0;
+const crypto_1 = require("crypto");
+const authentication_types_js_1 = require("./authentication-types.js");
+const authentication_types_js_2 = require("./authentication-types.js");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const prisma_js_1 = require("../../extra/prisma.js");
+const environment_js_1 = require("../../environment.js");
 const createJWToken = (parameters) => {
     // Generate token
     const jwtPayload = {
@@ -11,13 +17,13 @@ const createJWToken = (parameters) => {
         sub: parameters.id,
         username: parameters.username,
     };
-    const token = jwt.sign(jwtPayload, jwtSecretKey, {
+    const token = jsonwebtoken_1.default.sign(jwtPayload, environment_js_1.jwtSecretKey, {
         expiresIn: "30d",
     });
     return token;
 };
-export const checIfUserExistsAlready = async (parameters) => {
-    const ExistingUser = await prismaClient.user.findUnique({
+const checIfUserExistsAlready = async (parameters) => {
+    const ExistingUser = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             username: parameters.username,
         },
@@ -27,18 +33,19 @@ export const checIfUserExistsAlready = async (parameters) => {
     }
     return false;
 };
-export const signUpWithUsernameAndPassword = async (parameters) => {
+exports.checIfUserExistsAlready = checIfUserExistsAlready;
+const signUpWithUsernameAndPassword = async (parameters) => {
     try {
-        const isUserExistingAlready = await checIfUserExistsAlready({
+        const isUserExistingAlready = await (0, exports.checIfUserExistsAlready)({
             username: parameters.username,
         });
         if (isUserExistingAlready) {
-            throw SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME;
+            throw authentication_types_js_1.SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME;
         }
-        const passwordHash = createHash("sha256")
+        const passwordHash = (0, crypto_1.createHash)("sha256")
             .update(parameters.password)
             .digest("hex");
-        const user = await prismaClient.user.create({
+        const user = await prisma_js_1.prismaClient.user.create({
             data: {
                 username: parameters.username,
                 password: passwordHash,
@@ -56,22 +63,23 @@ export const signUpWithUsernameAndPassword = async (parameters) => {
         return result;
     }
     catch (e) {
-        throw SignUpWithUsernameAndPasswordError.UNKNOWN;
+        throw authentication_types_js_1.SignUpWithUsernameAndPasswordError.UNKNOWN;
     }
 };
-export const logInWithUsernameAndPassword = async (parameters) => {
+exports.signUpWithUsernameAndPassword = signUpWithUsernameAndPassword;
+const logInWithUsernameAndPassword = async (parameters) => {
     try {
-        const passwordHash = createHash("sha256")
+        const passwordHash = (0, crypto_1.createHash)("sha256")
             .update(parameters.password)
             .digest("hex");
-        const user = await prismaClient.user.findUnique({
+        const user = await prisma_js_1.prismaClient.user.findUnique({
             where: {
                 username: parameters.username,
                 password: passwordHash,
             },
         });
         if (!user) {
-            throw LogInWtihUsernameAndPasswordError.INCORRECT_USERNAME_OR_PASSWORD;
+            throw authentication_types_js_2.LogInWtihUsernameAndPasswordError.INCORRECT_USERNAME_OR_PASSWORD;
         }
         const token = createJWToken({
             id: user.id,
@@ -84,6 +92,7 @@ export const logInWithUsernameAndPassword = async (parameters) => {
     }
     catch (e) {
         console.log("Error", e);
-        throw LogInWtihUsernameAndPasswordError.UNKNOWN;
+        throw authentication_types_js_2.LogInWtihUsernameAndPasswordError.UNKNOWN;
     }
 };
+exports.logInWithUsernameAndPassword = logInWithUsernameAndPassword;

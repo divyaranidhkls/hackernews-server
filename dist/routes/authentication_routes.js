@@ -1,12 +1,15 @@
-import { Hono } from "hono";
-import { SignUpWithUsernameAndPasswordError, } from "../controllers/authentication/authentication-types.js";
-import { signUpWithUsernameAndPassword } from "../controllers/authentication/authentication-controllers.js";
-import { logInWithUsernameAndPassword } from "../controllers/authentication/authentication-controllers.js";
-export const authenticationRoutes = new Hono();
-authenticationRoutes.post("/sign-up", async (context) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authenticationRoutes = void 0;
+const hono_1 = require("hono");
+const authentication_types_js_1 = require("../controllers/authentication/authentication-types.js");
+const authentication_controllers_js_1 = require("../controllers/authentication/authentication-controllers.js");
+const authentication_controllers_js_2 = require("../controllers/authentication/authentication-controllers.js");
+exports.authenticationRoutes = new hono_1.Hono();
+exports.authenticationRoutes.post("/sign-up", async (context) => {
     const { username, password, email } = await context.req.json();
     try {
-        const result = await signUpWithUsernameAndPassword({
+        const result = await (0, authentication_controllers_js_1.signUpWithUsernameAndPassword)({
             username,
             password,
             email,
@@ -16,7 +19,7 @@ authenticationRoutes.post("/sign-up", async (context) => {
         }, 201);
     }
     catch (e) {
-        if (e === SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME) {
+        if (e === authentication_types_js_1.SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME) {
             return context.json({
                 message: "Username already exists",
             }, 409);
@@ -26,10 +29,10 @@ authenticationRoutes.post("/sign-up", async (context) => {
         }, 500);
     }
 });
-authenticationRoutes.post("/log-in", async (context) => {
+exports.authenticationRoutes.post("/log-in", async (context) => {
     const { username, password } = await context.req.json();
     try {
-        const result = await logInWithUsernameAndPassword({
+        const result = await (0, authentication_controllers_js_2.logInWithUsernameAndPassword)({
             username,
             password,
         });
@@ -38,7 +41,7 @@ authenticationRoutes.post("/log-in", async (context) => {
         }, 201);
     }
     catch (e) {
-        if (e === SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME) {
+        if (e === authentication_types_js_1.SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME) {
             return context.json({
                 message: "Username already exists",
             }, 409);

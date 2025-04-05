@@ -1,12 +1,15 @@
-import { prismaClient } from "../../extra/prisma.js";
-import { getDeletepostsError, getPostsError, } from "./posts-types.js";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deletePostsById = exports.getPostsBymeInOrder = exports.getPostsCronologicalOrder = exports.createPosts = void 0;
+const prisma_js_1 = require("../../extra/prisma.js");
+const posts_types_js_1 = require("./posts-types.js");
 //POST /posts -- Creates a post (authored by the current user).
-export const createPosts = async (parameters) => {
+const createPosts = async (parameters) => {
     const { userId, input } = parameters;
     if (!input.title || !input.content) {
-        throw getPostsError.BAD_REQUEST;
+        throw posts_types_js_1.getPostsError.BAD_REQUEST;
     }
-    const newPost = await prismaClient.post.create({
+    const newPost = await prisma_js_1.prismaClient.post.create({
         data: {
             userId: userId,
             content: input.content,
@@ -15,9 +18,10 @@ export const createPosts = async (parameters) => {
     });
     return { post: newPost };
 };
+exports.createPosts = createPosts;
 //GET /posts -- Returns all posts in reverse chronological order (paginated).
-export const getPostsCronologicalOrder = async (page = 1, limit = 1) => {
-    const Results = await prismaClient.post.findMany({
+const getPostsCronologicalOrder = async (page = 1, limit = 1) => {
+    const Results = await prisma_js_1.prismaClient.post.findMany({
         orderBy: {
             createdAt: "desc",
         },
@@ -27,14 +31,15 @@ export const getPostsCronologicalOrder = async (page = 1, limit = 1) => {
         skip: (page - 1) * limit,
         take: limit,
     });
-    const total = await prismaClient.post.count();
+    const total = await prisma_js_1.prismaClient.post.count();
     if (!Results) {
-        throw getPostsError.BAD_REQUEST;
+        throw posts_types_js_1.getPostsError.BAD_REQUEST;
     }
     return { post: Results, total: total };
 };
-export const getPostsBymeInOrder = async (parameters) => {
-    const Results = await prismaClient.post.findMany({
+exports.getPostsCronologicalOrder = getPostsCronologicalOrder;
+const getPostsBymeInOrder = async (parameters) => {
+    const Results = await prisma_js_1.prismaClient.post.findMany({
         orderBy: {
             createdAt: "desc",
         },
@@ -47,36 +52,38 @@ export const getPostsBymeInOrder = async (parameters) => {
         skip: (parameters.page - 1) * parameters.limit,
         take: parameters.limit,
     });
-    const total = await prismaClient.post.count();
+    const total = await prisma_js_1.prismaClient.post.count();
     if (!Results) {
-        throw getPostsError.BAD_REQUEST;
+        throw posts_types_js_1.getPostsError.BAD_REQUEST;
     }
     return { post: Results, total: total };
 };
-export const deletePostsById = async (Parameters) => {
+exports.getPostsBymeInOrder = getPostsBymeInOrder;
+const deletePostsById = async (Parameters) => {
     const { userId, postId } = Parameters;
-    const user = await prismaClient.user.findUnique({
+    const user = await prisma_js_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!user) {
-        throw getDeletepostsError.NOT_FOUND;
+        throw posts_types_js_1.getDeletepostsError.NOT_FOUND;
     }
     else {
-        const posts = await prismaClient.post.findUnique({
+        const posts = await prisma_js_1.prismaClient.post.findUnique({
             where: {
                 id: postId,
             },
         });
         if (posts) {
-            await prismaClient.post.delete({
+            await prisma_js_1.prismaClient.post.delete({
                 where: {
                     id: postId,
                 },
             });
             return "Posts Deleted";
         }
-        throw getDeletepostsError.UNAUTHORIZED;
+        throw posts_types_js_1.getDeletepostsError.UNAUTHORIZED;
     }
 };
+exports.deletePostsById = deletePostsById;

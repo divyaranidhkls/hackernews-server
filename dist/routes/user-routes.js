@@ -1,13 +1,16 @@
-import { Hono } from "hono";
-import { getmeError, } from "../controllers/users/users-types.js";
-import { tokenMiddleware } from "./middlewares/token-middlewares.js";
-import { getMe } from "../controllers/users/user-controllers.js";
-import { getAllUsers } from "../controllers/users/user-controllers.js";
-export const usersRoutes = new Hono();
-usersRoutes.get("/me", tokenMiddleware, async (context) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.usersRoutes = void 0;
+const hono_1 = require("hono");
+const users_types_js_1 = require("../controllers/users/users-types.js");
+const token_middlewares_js_1 = require("./middlewares/token-middlewares.js");
+const user_controllers_js_1 = require("../controllers/users/user-controllers.js");
+const user_controllers_js_2 = require("../controllers/users/user-controllers.js");
+exports.usersRoutes = new hono_1.Hono();
+exports.usersRoutes.get("/me", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const userId = context.get("userId");
     try {
-        const user = await getMe({
+        const user = await (0, user_controllers_js_1.getMe)({
             userId,
         });
         return context.json({
@@ -15,7 +18,7 @@ usersRoutes.get("/me", tokenMiddleware, async (context) => {
         }, 200);
     }
     catch (e) {
-        if (e === getmeError.BAD_REQUEST) {
+        if (e === users_types_js_1.getmeError.BAD_REQUEST) {
             return context.json({
                 error: "User not found",
             }, 400);
@@ -25,20 +28,20 @@ usersRoutes.get("/me", tokenMiddleware, async (context) => {
         }, 500);
     }
 });
-usersRoutes.get("/getAllUsers", tokenMiddleware, async (context) => {
+exports.usersRoutes.get("/getAllUsers", token_middlewares_js_1.tokenMiddleware, async (context) => {
     try {
-        const users = await getAllUsers();
+        const users = await (0, user_controllers_js_2.getAllUsers)();
         return context.json(users, 200);
     }
     catch (e) {
         return context.json({ message: e }, 404);
     }
 });
-usersRoutes.get("/getAllusers", tokenMiddleware, async (context) => {
+exports.usersRoutes.get("/getAllusers", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const page = Number(context.req.query("page") || 1);
     const limit = Number(context.req.query("limit") || 10);
     try {
-        const result = await getAllUsers(page, limit);
+        const result = await (0, user_controllers_js_2.getAllUsers)(page, limit);
         return context.json({
             data: result.user,
             pagination: {

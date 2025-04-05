@@ -1,25 +1,28 @@
-import { createPosts, deletePostsById, getPostsCronologicalOrder, } from "../controllers/posts/posts-controllers.js";
-import { Hono } from "hono";
-import { tokenMiddleware } from "./middlewares/token-middlewares.js";
-import { getPostsBymeInOrder } from "../controllers/posts/posts-controllers.js";
-import { getDeletepostsError } from "../controllers/posts/posts-types.js";
-export const postRoutes = new Hono();
-postRoutes.post("/post", tokenMiddleware, async (context) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.postRoutes = void 0;
+const posts_controllers_js_1 = require("../controllers/posts/posts-controllers.js");
+const hono_1 = require("hono");
+const token_middlewares_js_1 = require("./middlewares/token-middlewares.js");
+const posts_controllers_js_2 = require("../controllers/posts/posts-controllers.js");
+const posts_types_js_1 = require("../controllers/posts/posts-types.js");
+exports.postRoutes = new hono_1.Hono();
+exports.postRoutes.post("/post", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const userId = await context.get("userId");
     const input = await context.req.json();
     try {
-        const result = await createPosts({ userId, input });
+        const result = await (0, posts_controllers_js_1.createPosts)({ userId, input });
         return context.json({ message: "Posts Created", post: result });
     }
     catch (e) {
         throw e;
     }
 });
-postRoutes.get("/getAllposts", tokenMiddleware, async (context) => {
+exports.postRoutes.get("/getAllposts", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const page = Number(context.req.query("page") || 1);
     const limit = Number(context.req.query("limit") || 10);
     try {
-        const result = await getPostsCronologicalOrder(page, limit);
+        const result = await (0, posts_controllers_js_1.getPostsCronologicalOrder)(page, limit);
         return context.json({
             data: result.post,
             pagination: {
@@ -34,12 +37,12 @@ postRoutes.get("/getAllposts", tokenMiddleware, async (context) => {
         return context.json({ message: e }, 404);
     }
 });
-postRoutes.get("/getPostsBymeInOrder", tokenMiddleware, async (context) => {
+exports.postRoutes.get("/getPostsBymeInOrder", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const page = Number(context.req.query("page") || 1);
     const limit = Number(context.req.query("limit") || 10);
     const userId = context.get("userId");
     try {
-        const result = await getPostsBymeInOrder({ page, limit, userId });
+        const result = await (0, posts_controllers_js_2.getPostsBymeInOrder)({ page, limit, userId });
         return context.json({
             data: result.post,
             pagination: {
@@ -57,20 +60,20 @@ postRoutes.get("/getPostsBymeInOrder", tokenMiddleware, async (context) => {
         message: "Internal Server Error",
     }, 500);
 });
-postRoutes.delete("/DeletePosts/:postId", tokenMiddleware, async (context) => {
+exports.postRoutes.delete("/DeletePosts/:postId", token_middlewares_js_1.tokenMiddleware, async (context) => {
     const userId = await context.get("userId");
     const postId = await context.req.param("postId");
     try {
-        const deletePosts = await deletePostsById({ userId, postId });
+        const deletePosts = await (0, posts_controllers_js_1.deletePostsById)({ userId, postId });
         if (deletePosts) {
             return context.json("Posts deleted Successfully");
         }
     }
     catch (e) {
-        if (e === getDeletepostsError.UNAUTHORIZED) {
+        if (e === posts_types_js_1.getDeletepostsError.UNAUTHORIZED) {
             return context.json("Post Already Deleted");
         }
-        if (e === getDeletepostsError.NOT_FOUND) {
+        if (e === posts_types_js_1.getDeletepostsError.NOT_FOUND) {
             return context.json("User Not Fond");
         }
     }
