@@ -1,17 +1,14 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { allRoutes } from "./routes/routes.js";
+import { serve } from '@hono/node-server'
+//import "dotenv/config";
+import { allRoutes } from "./routes/routes";
 
-allRoutes.get("/health", (c) => {
-  return c.text("Hello Hono!");
+
+allRoutes.get("/info", (context) => {
+  return context.json({
+    message: "Hello World",
+  });
 });
 
-serve(
-  {
-    fetch: allRoutes.fetch,
-    port: 3000,
-  },
-  (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  }
-);
+serve(allRoutes, (info) => {
+  console.log(`Server is running @ http://localhost:${info.port}`);
+});
