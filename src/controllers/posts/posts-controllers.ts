@@ -31,29 +31,33 @@ export const createPosts = async (parameters: {
   return { post: newPost };
 };
 
+
 //GET /posts -- Returns all posts in reverse chronological order (paginated).
-export const getPostsCronologicalOrder = async (
+export const getPostsChronologicalOrder = async (
   page: number = 1,
-  limit: number = 1
+  limit: number = 10
 ): Promise<getPostsCrono> => {
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+
+  if (!Number.isInteger(pageNumber) || pageNumber <= 0 || !Number.isInteger(limitNumber) || limitNumber <= 0) {
+    throw getPostsError.BAD_REQUEST; // or custom error saying invalid page/limit
+  }
+
   const Results = await prismaClient.post.findMany({
     orderBy: {
       createdAt: "desc",
     },
-    include: {
-      posts: true,
-    },
-    skip: (page - 1) * limit,
-    take: limit,
+    // Remove the wrong `include`
+    skip: (pageNumber - 1) * limitNumber,
+    take: limitNumber,
   });
+
   const total = await prismaClient.post.count();
 
-  if (!Results) {
-    throw getPostsError.BAD_REQUEST;
-  }
-
-  return { post: Results, total: total };
+  return { post: Results, total };
 };
+
 
 export const getPostsBymeInOrder = async (parameters: {
   userId: string;

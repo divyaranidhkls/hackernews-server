@@ -2,37 +2,50 @@ import { getPostsError } from "../controllers/posts/posts-types.js";
 import {
   createPosts,
   deletePostsById,
-  getPostsCronologicalOrder,
+  getPostsChronologicalOrder,
 } from "../controllers/posts/posts-controllers.js";
 import { prismaClient } from "../extra/prisma.js";
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middlewares.js";
 import { getPostsBymeInOrder } from "../controllers/posts/posts-controllers.js";
 import { getDeletepostsError } from "../controllers/posts/posts-types.js";
+import { sessionMiddleware } from "./middlewares/session-middlewares.js";
+
 
 export const postRoutes = new Hono();
 
-postRoutes.post("/post", tokenMiddleware, async (context) => {
-  const userId = await context.get("userId");
+postRoutes.post("/createposts", sessionMiddleware, async (context) => {
+  const user = context.get("user");  // Access the user object correctly
+  if (!user || !user.id) {
+    return context.json({ message: "Unauthorized" }, 401);
+  }
+  
+  const userId = user.id;  // Extract the id property
   const input = await context.req.json();
-
+  
   try {
     const result = await createPosts({ userId, input });
-
-    return context.json({ message: "Posts Created", post: result });
+    return context.json({ message: "Post Created", post: result });
   } catch (e) {
-    throw e;
+    console.error("Error creating post:", e);
+    return context.json({ message: "Error creating post", error: String(e) }, 500);
   }
 });
 
-postRoutes.get("/getAllposts", tokenMiddleware, async (context) => {
-  const page = Number(context.req.query("page") || 1);
-  const limit = Number(context.req.query("limit") || 10);
+
+postRoutes.get('/getAllposts', sessionMiddleware, async (context) => {
   try {
-    const result = await getPostsCronologicalOrder(page, limit);
+    const page = parseInt(context.req.query('page') || '1', 10);
+    const limit = parseInt(context.req.query('limit') || '10', 10);
+
+    const result = await getPostsChronologicalOrder(page, limit);
+
+    
+    
 
     return context.json(
       {
+        success: true,
         data: result.post,
         pagination: {
           page,
@@ -43,8 +56,16 @@ postRoutes.get("/getAllposts", tokenMiddleware, async (context) => {
       },
       200
     );
-  } catch (e) {
-    return context.json({ message: e }, 404);
+
+  } catch (e: any) {
+    console.error('Error fetching posts:', e);
+    return context.json(
+      {
+        success: false,
+        message: e?.message || 'Failed to fetch posts',
+      },
+      500
+    );
   }
 });
 
@@ -99,3 +120,27 @@ postRoutes.delete("/DeletePosts/:postId", tokenMiddleware, async (context) => {
   }
   return context.json("Cant Delete");
 });
+
+postRoutes.get("/AuthorById/:postId",sessionMiddleware, async (context) => {
+  const postId = context.req.param("postId");
+
+  try {
+    const author = await prismaClient.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        posts: true,
+      },
+    });
+
+    if (!author) {
+      return context.json({ message: "Author not found" }, 404);
+    }
+
+    return context.json(author.posts, 200);
+  } catch (e) {
+    return context.json({ message: e }, 500);
+  }
+}
+);

@@ -23,18 +23,15 @@ export const LikePosts = async (parameters: {
   if (!postExists) {
     throw LikeErrors.NOT_FOUND;
   }
-
-
-  const LikeExists = await prismaClient.like.findFirst({
-    where: {
-      userId,
-      postId,
-    },
+  const userLike = await prismaClient.like.findFirst({
+    where: { postId, userId: userId },
   });
-  if (LikeExists) {
+  
+
+  if (userLike) {
     throw LikeErrors.ALREADY_LIKED;
   }
-
+  
   const Result = await prismaClient.like.create({
     data: {
       userId,
@@ -48,23 +45,28 @@ export const LikePosts = async (parameters: {
 export const getLikes = async (parameters: {
   page: number;
   limit: number;
-  postId: String;
+  postId: string; // Also ensure consistent casing: use `string`, not `String`
 }): Promise<getAllLikes> => {
-  const { page, limit } = parameters;
+  const { page, limit, postId } = parameters;
+
   const Results = await prismaClient.like.findMany({
+    where: {
+      postId, // <-- Filter by postId
+    },
     orderBy: {
       createdAt: "desc",
     },
     skip: (page - 1) * limit,
     take: limit,
   });
-  const total = await prismaClient.like.count();
 
-  if (!Results) {
-    throw LikeErrors.UNAUTHORIZED;
-  }
+  const total = await prismaClient.like.count({
+    where: {
+      postId, // <-- Count only likes for this post
+    },
+  });
 
-  return { Like: Results, total: total };
+  return { Like: Results, total };
 };
 
 export const deleteLikeById = async (Parameters: {

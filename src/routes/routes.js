@@ -9,4 +9,4 @@ allRoutes.route("/Log-in", authenticationRoutes);
 allRoutes.route("/Users", usersRoutes);
 allRoutes.route("/Posts", postRoutes);
 allRoutes.route("/Like", LikeRoutes);
-allRoutes.route("/Comment", CommentRoutes);
+allRoutes.route("/comment", CommentRoutes);

@@ -1,71 +1,63 @@
 import { Hono } from "hono";
-import { LikeErrors, type LikePost } from "../controllers/Likes/likes-types.js";
+import { LikeErrors, DeleteLikeErrors } from "../controllers/Likes/likes-types.js";
 import { prismaClient } from "../extra/prisma.js";
-import { tokenMiddleware } from "../routes/middlewares/token-middlewares.js";
-import { LikePosts } from "../controllers/Likes/like_controllers.js";
-import { getLikes } from "../controllers/Likes/like_controllers.js";
-import { deleteLikeById } from "../controllers/Likes/like_controllers.js";
-import { DeleteLikeErrors } from "../controllers/Likes/likes-types.js";
+import { sessionMiddleware } from "./middlewares/session-middlewares.js";
+import { LikePosts, getLikes, deleteLikeById } from "../controllers/Likes/like_controllers.js";
+
 export const LikeRoutes = new Hono();
-LikeRoutes.post("/LikePosts/:postId", tokenMiddleware, async (c) => {
-  const userId = await c.get("userId");
-  const postId = await c.req.param("postId");
+
+// Like a post
+LikeRoutes.post("/LikePosts/:postId", sessionMiddleware, async (c) => {
+  const userId = c.get("user").id; // Get user ID from session
+  
+  const postId =c.req.param("postId");
+
   try {
     const posts = await LikePosts({ userId, postId });
-    if (posts) {
-      return c.json({ message: "Liked Succefully", posts });
-    }
+    return c.json({ message: "Liked Successfully", posts });
   } catch (e) {
     if (e === LikeErrors.ALREADY_LIKED) {
-      return c.json("Already Liked");
+      return c.json({ message: "Already Liked" });
     }
     if (e === LikeErrors.NOT_FOUND) {
-      return c.json("User | post Not Found");
+      return c.json({ message: "User or Post Not Found" });
     }
-    return c.json("Internal Server Eror ");
+    console.error("LikePosts error:", e);
+    return c.json({ message: "Internal Server Error" }, 500);
+    
   }
 });
 
-LikeRoutes.get("/getAllLikes/:postId", tokenMiddleware, async (context) => {
-  const page = Number(context.req.query("page") || 1);
-  const limit = Number(context.req.query("limit") || 10);
-  const postId = await context.req.param("postId");
+// Get all likes and whether the user liked it
+LikeRoutes.get("/getAllLikes/:postId", async (c) => {
+  const postId = c.req.param("postId");
+  const page = Number(c.req.query("page") ?? "1");
+  const limit = Number(c.req.query("limit") ?? "10");
+
   try {
-    const result = await getLikes({ page, limit, postId });
-
-    return context.json(
-      {
-        data: result.Like,
-        pagination: {
-          page,
-          limit,
-          total: result.total,
-          totalPages: Math.ceil(result.total / limit),
-        },
-      },
-      200
-    );
-  } catch (e) {
-    return context.json({ message: e }, 404);
+    const result = await getLikes({ postId, page, limit });
+    return c.json({ data: result.Like, total: result.total });
+  } catch (error) {
+    return c.json({ message: "Error fetching likes", error});
   }
 });
 
-LikeRoutes.delete("/DeleteLikes/:postId", tokenMiddleware, async (context) => {
-  const userId = context.get("userId");
-  const postId = await context.req.param("postId");
+// Delete a like
+LikeRoutes.delete("/DeleteLikes/:postId", sessionMiddleware, async (context) => {
+  const user = context.get("user");
+  const userId = user.id;
+  const postId = context.req.param("postId");
 
   try {
     const deleteLikes = await deleteLikeById({ userId, postId });
-    if (deleteLikes) {
-      return context.json("Like deleted Successfully");
-    }
+    return context.json({ message: "Like deleted successfully" });
   } catch (e) {
     if (e === DeleteLikeErrors.NOT_FOUND) {
-      return context.json("Like Not Found");
+      return context.json({ message: "Like Not Found" });
     }
     if (e === DeleteLikeErrors.UNAUTHORIZED) {
-      return context.json("User is Not Authorized");
+      return context.json({ message: "User is Not Authorized" });
     }
+    return context.json({ message: "Internal Server Error" });
   }
-  return context.json("Internal ServerError");
 });
