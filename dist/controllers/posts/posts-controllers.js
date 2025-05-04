@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePostsById = exports.getPostsBymeInOrder = exports.getPostsCronologicalOrder = exports.createPosts = void 0;
+exports.deletePostsById = exports.getPostsBymeInOrder = exports.getPostsChronologicalOrder = exports.createPosts = void 0;
 const prisma_js_1 = require("../../extra/prisma.js");
 const posts_types_js_1 = require("./posts-types.js");
 //POST /posts -- Creates a post (authored by the current user).
@@ -20,24 +20,24 @@ const createPosts = async (parameters) => {
 };
 exports.createPosts = createPosts;
 //GET /posts -- Returns all posts in reverse chronological order (paginated).
-const getPostsCronologicalOrder = async (page = 1, limit = 1) => {
+const getPostsChronologicalOrder = async (page = 1, limit = 10) => {
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    if (!Number.isInteger(pageNumber) || pageNumber <= 0 || !Number.isInteger(limitNumber) || limitNumber <= 0) {
+        throw posts_types_js_1.getPostsError.BAD_REQUEST; // or custom error saying invalid page/limit
+    }
     const Results = await prisma_js_1.prismaClient.post.findMany({
         orderBy: {
             createdAt: "desc",
         },
-        include: {
-            posts: true,
-        },
-        skip: (page - 1) * limit,
-        take: limit,
+        // Remove the wrong `include`
+        skip: (pageNumber - 1) * limitNumber,
+        take: limitNumber,
     });
     const total = await prisma_js_1.prismaClient.post.count();
-    if (!Results) {
-        throw posts_types_js_1.getPostsError.BAD_REQUEST;
-    }
-    return { post: Results, total: total };
+    return { post: Results, total };
 };
-exports.getPostsCronologicalOrder = getPostsCronologicalOrder;
+exports.getPostsChronologicalOrder = getPostsChronologicalOrder;
 const getPostsBymeInOrder = async (parameters) => {
     const Results = await prisma_js_1.prismaClient.post.findMany({
         orderBy: {

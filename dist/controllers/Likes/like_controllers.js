@@ -22,13 +22,10 @@ const LikePosts = async (parameters) => {
     if (!postExists) {
         throw likes_types_js_1.LikeErrors.NOT_FOUND;
     }
-    const LikeExists = await prisma_js_1.prismaClient.like.findFirst({
-        where: {
-            userId,
-            postId,
-        },
+    const userLike = await prisma_js_1.prismaClient.like.findFirst({
+        where: { postId, userId: userId },
     });
-    if (LikeExists) {
+    if (userLike) {
         throw likes_types_js_1.LikeErrors.ALREADY_LIKED;
     }
     const Result = await prisma_js_1.prismaClient.like.create({
@@ -41,19 +38,23 @@ const LikePosts = async (parameters) => {
 };
 exports.LikePosts = LikePosts;
 const getLikes = async (parameters) => {
-    const { page, limit } = parameters;
+    const { page, limit, postId } = parameters;
     const Results = await prisma_js_1.prismaClient.like.findMany({
+        where: {
+            postId, // <-- Filter by postId
+        },
         orderBy: {
             createdAt: "desc",
         },
         skip: (page - 1) * limit,
         take: limit,
     });
-    const total = await prisma_js_1.prismaClient.like.count();
-    if (!Results) {
-        throw likes_types_js_1.LikeErrors.UNAUTHORIZED;
-    }
-    return { Like: Results, total: total };
+    const total = await prisma_js_1.prismaClient.like.count({
+        where: {
+            postId, // <-- Count only likes for this post
+        },
+    });
+    return { Like: Results, total };
 };
 exports.getLikes = getLikes;
 const deleteLikeById = async (Parameters) => {
