@@ -1,15 +1,16 @@
-FROM node:22.1.0
+FROM node:20-alpine
 
 WORKDIR /app
 
+COPY package.json package-lock.json ./
+RUN npm ci
+
 COPY . .
 
-RUN npm install
+# Generate Prisma client
+RUN npx prisma generate
 
-RUN if [ -f "./prisma/schema.prisma" ]; then npx prisma generate; fi
 
-RUN npm run build
 
 EXPOSE 3000
-
 CMD ["npm", "start"]

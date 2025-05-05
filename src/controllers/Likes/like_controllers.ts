@@ -1,7 +1,7 @@
-import { type LikePost, LikeErrors } from "./likes-types.js";
-import { prismaClient } from "../../extra/prisma.js";
-import { type getAllLikes } from "./likes-types.js";
-import { DeleteLikeErrors } from "../Likes/likes-types.js";
+import { type LikePost, LikeErrors } from "./likes-types";
+import { prismaClient } from "../../extra/prisma";
+import { type getAllLikes } from "./likes-types";
+import { DeleteLikeErrors } from "../Likes/likes-types";
 export const LikePosts = async (parameters: {
   userId: string;
   postId: string;

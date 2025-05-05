@@ -1,6 +1,6 @@
-import { getmeError, GetUserError, type getmeResult } from "./users-types.js";
-import { type userResult } from "./users-types.js";
-import { prismaClient } from "../../extra/prisma.js";
+import { getmeError, GetUserError, type getmeResult } from "./users-types";
+import { type userResult } from "./users-types";
+import { prismaClient } from "../../extra/prisma";
 
 export const getMe = async (parameters: {
   userId: string;

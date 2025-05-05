@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllComments = exports.UpdateComments = exports.deteleComments = exports.getComments = exports.CommentPosts = void 0;
-const prisma_js_1 = require("../../extra/prisma.js");
-const comments_types_js_1 = require("../Comments/comments-types.js");
+const prisma_1 = require("../../extra/prisma");
+const comments_types_1 = require("../Comments/comments-types");
 const CommentPosts = async (parameters) => {
     const { userId, postId, content } = parameters;
     // const userExists = await prismaClient.user.findUnique({
@@ -21,7 +21,7 @@ const CommentPosts = async (parameters) => {
     // if (!postExists) {
     //   throw getcommentError.NOT_FOUND;
     // }
-    const Result = await prisma_js_1.prismaClient.comment.create({
+    const Result = await prisma_1.prismaClient.comment.create({
         data: {
             userId: userId,
             postId: postId,
@@ -35,7 +35,7 @@ exports.CommentPosts = CommentPosts;
 const getComments = async (parameters) => {
     const { page, limit, postId } = parameters;
     try {
-        const Results = await prisma_js_1.prismaClient.comment.findMany({
+        const Results = await prisma_1.prismaClient.comment.findMany({
             where: {
                 postId: postId, // Add a condition to filter by postId
             },
@@ -45,7 +45,7 @@ const getComments = async (parameters) => {
             skip: (page - 1) * limit, // Pagination: Skip based on the page and limit
             take: limit, // Limit the number of results
         });
-        const total = await prisma_js_1.prismaClient.comment.count({
+        const total = await prisma_1.prismaClient.comment.count({
             where: {
                 postId: postId, // Count only comments for the specific postId
             },
@@ -60,23 +60,23 @@ const getComments = async (parameters) => {
 exports.getComments = getComments;
 const deteleComments = async (parameters) => {
     const { userId, commentsId } = parameters;
-    const users = await prisma_js_1.prismaClient.user.findUnique({
+    const users = await prisma_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!users) {
-        throw comments_types_js_1.getcommentError.UNAUTHORIZED;
+        throw comments_types_1.getcommentError.UNAUTHORIZED;
     }
-    const comments = await prisma_js_1.prismaClient.comment.findUnique({
+    const comments = await prisma_1.prismaClient.comment.findUnique({
         where: {
             id: commentsId,
         },
     });
     if (!comments) {
-        throw comments_types_js_1.getcommentError.NOT_FOUND;
+        throw comments_types_1.getcommentError.NOT_FOUND;
     }
-    await prisma_js_1.prismaClient.comment.delete({
+    await prisma_1.prismaClient.comment.delete({
         where: {
             id: commentsId,
         },
@@ -86,23 +86,23 @@ const deteleComments = async (parameters) => {
 exports.deteleComments = deteleComments;
 const UpdateComments = async (parameters) => {
     const { userId, commentsId, content } = parameters;
-    const users = await prisma_js_1.prismaClient.user.findUnique({
+    const users = await prisma_1.prismaClient.user.findUnique({
         where: {
             id: userId,
         },
     });
     if (!users) {
-        throw comments_types_js_1.getcommentError.UNAUTHORIZED;
+        throw comments_types_1.getcommentError.UNAUTHORIZED;
     }
-    const comments = await prisma_js_1.prismaClient.comment.findUnique({
+    const comments = await prisma_1.prismaClient.comment.findUnique({
         where: {
             id: commentsId,
         },
     });
     if (!comments) {
-        throw comments_types_js_1.getcommentError.NOT_FOUND;
+        throw comments_types_1.getcommentError.NOT_FOUND;
     }
-    const newComment = await prisma_js_1.prismaClient.comment.update({
+    const newComment = await prisma_1.prismaClient.comment.update({
         where: {
             id: commentsId,
         },
@@ -115,7 +115,7 @@ const UpdateComments = async (parameters) => {
 exports.UpdateComments = UpdateComments;
 const getAllComments = async (parameters) => {
     const { userId, page, limit } = parameters;
-    const comments = await prisma_js_1.prismaClient.comment.findMany({
+    const comments = await prisma_1.prismaClient.comment.findMany({
         where: {
             userId: userId,
         },
@@ -125,7 +125,7 @@ const getAllComments = async (parameters) => {
         skip: (page - 1) * limit,
         take: limit,
     });
-    const total = await prisma_js_1.prismaClient.comment.count({
+    const total = await prisma_1.prismaClient.comment.count({
         where: {
             userId: userId,
         },

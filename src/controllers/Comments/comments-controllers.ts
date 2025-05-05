@@ -1,9 +1,9 @@
-import { prismaClient } from "../../extra/prisma.js";
+import { prismaClient } from "../../extra/prisma";
 import {
   type getcommentResult,
   getcommentError,
   type getCommentByOrder,
-} from "../Comments/comments-types.js";
+} from "../Comments/comments-types";
 export const CommentPosts = async (parameters: {
   userId: string;
   postId: string;
