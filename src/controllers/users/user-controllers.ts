@@ -16,7 +16,10 @@ export const getMe = async (parameters: {
   }
 
   return {
-    user,
+    user: {
+      ...user,
+      displayUsername: user.username.toUpperCase(), // Example logic for displayUsername
+    },
   };
 };
 export const getAllUsers = async (
@@ -30,12 +33,16 @@ export const getAllUsers = async (
     skip: (page - 1) * limit,
     take: limit,
   });
-  const totalusers = Number(prismaClient.user.count());
+  const totalusers = Number(await prismaClient.user.count());
   if (!users) {
     throw GetUserError.BAD_REQUEST;
   }
+  const usersWithDisplayUsername = users.map(user => ({
+    ...user,
+    displayUsername: user.username.toUpperCase(), // Example logic for displayUsername
+  }));
   return {
-    user: users,
+    user: usersWithDisplayUsername,
     total: totalusers,
   };
 };
