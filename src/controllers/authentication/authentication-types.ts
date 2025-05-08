@@ -1,22 +1,22 @@
-import type { User } from "../../generated/prisma/client";
+// import type { User } from "../../generated/prisma/client";
 
 
-export type SignUpWithUsernameAndPasswordResult = {
-  token: string;
-  user: User;
-};
+// export type SignUpWithUsernameAndPasswordResult = {
+//   token: string;
+//   user: User;
+// };
 
-export enum SignUpWithUsernameAndPasswordError {
-  CONFLICTING_USERNAME = "CONFLICTING_USERNAME",
-  UNKNOWN = "UNKNOWN",
-}
+// export enum SignUpWithUsernameAndPasswordError {
+//   CONFLICTING_USERNAME = "CONFLICTING_USERNAME",
+//   UNKNOWN = "UNKNOWN",
+// }
 
-export type LogInWithUsernameAndPasswordResult = {
-  token: string;
-  user: User;
-};
+// export type LogInWithUsernameAndPasswordResult = {
+//   token: string;
+//   user: User;
+// };
 
-export enum LogInWtihUsernameAndPasswordError {
-  INCORRECT_USERNAME_OR_PASSWORD = "INCORRECT_USERNAME_OR_PASSWORD",
-  UNKNOWN = "UNKNOWN",
-}
+// export enum LogInWtihUsernameAndPasswordError {
+//   INCORRECT_USERNAME_OR_PASSWORD = "INCORRECT_USERNAME_OR_PASSWORD",
+//   UNKNOWN = "UNKNOWN",
+// }
