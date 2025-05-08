@@ -4,8 +4,8 @@ import {
   type getmeResult,
 } from "../controllers/users/users-types.js";
 import { tokenMiddleware } from "./middlewares/token-middlewares.js";
-import { getMe } from "../controllers/users/user-controllers.js";
-import { getAllUsers } from "../controllers/users/user-controllers.js";
+import { getMe } from "../controllers/users/user-controllers";
+import { getAllUsers } from "../controllers/users/user-controllers";
 export const usersRoutes = new Hono();
 
 usersRoutes.get("/me", tokenMiddleware, async (context) => {
